@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Calculator</title>
+        <meta charset="UTF-8">
+        <meta name="description" content="A calculator app created as part of The Odin Project Foundations course.">
+        <meta name="author" content="Joseph Bakes">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <main class="l-page-wrapper">
+            <div class="l-calculator__body">
+                <div class="c-calculator__display js-display">12345</div>
+                <button class="c-calculator__button --action js-clear-all" id="all-clear">AC</button>
+                <button class="c-calculator__button --action js-backspace" id="clear">C</button>
+                <button class="c-calculator__button --action --blank"></button>
+                <button class="c-calculator__button --operator js-operator-button" id="divide">&#x00F7</button>
+                <button class="c-calculator__button --number js-numpad-button" id="7">7</button>
+                <button class="c-calculator__button --number js-numpad-button" id="8">8</button>
+                <button class="c-calculator__button --number js-numpad-button" id="9">9</button>
+                <button class="c-calculator__button --operator js-operator-button" id="multiply">&#x00D7</button>
+                <button class="c-calculator__button --number js-numpad-button" id="4">4</button>
+                <button class="c-calculator__button --number js-numpad-button" id="5">5</button>
+                <button class="c-calculator__button --number js-numpad-button" id="6">6</button>
+                <button class="c-calculator__button --operator js-operator-button" id="subtract">-</button>
+                <button class="c-calculator__button --number js-numpad-button" id="1">1</button>
+                <button class="c-calculator__button --number js-numpad-button" id="2">2</button>
+                <button class="c-calculator__button --number js-numpad-button" id="3">3</button>
+                <button class="c-calculator__button --operator js-operator-button" id="add">+</button>
+                <button class="c-calculator__button --action --blank"></button>
+                <button class="c-calculator__button --number js-numpad-button" id="0">0</button>
+                <button class="c-calculator__button --number js-numpad-button" id="decimal-point">.</button>
+                <button class="c-calculator__button --action js-equals" id="equals">=</button>
+            </div>
+        </main>
+        <script type="module" src="main.js"></script> 
+    </body>
+</html>
