@@ -19,7 +19,7 @@ body {
 
 .l-calculator__body {
     padding: 25px 10px 15px 10px;
-    height: 600px;
+    height: 650px;
     width: 400px;
     background-color: darkgrey;
 
@@ -28,18 +28,18 @@ body {
 
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(6, 1fr);    
+    grid-template-rows: 1.5fr repeat(5, 1fr);
 }
 
-.c-calculator__display {
+.l-calculator__display {
     grid-column: 1 / 5;
     grid-row: 1 / 2;
     background-color: yellowgreen;
     display: flex;
     justify-content: flex-end;
-    align-items: center;
-    font-size: 48px;
-    padding-right: 15px;
+    align-items: flex-end;
+    font-size: 60px;
+    padding: 0px 15px 15px 5px;
     margin: 3px;
 
     box-shadow: inset 0px 0px 8px -1px black;

@@ -18,26 +18,47 @@ const Operator = {
 }
 
 export class Controller {
-    displayValue = "";
+    // UI elements
+    displayValueElement;
     displayPanel;
 
+    test;
+
+    // Stored values/flags
+    currentValue = null;
+    pendingDecimal = false;
     pendingValue = null;
     pendingOperator = null;
 
+    // Init
     constructor() {
         this.bindUI()
     }
-   
+
+    
+    // Core Methods
     operate(operator, a, b) {
         return operator.calc(a,b);
     }
 
+    updateDisplay() {
+        this.displayValueElement.textContent = (this.currentValue ?? "").toString() + (this.pendingDecimal ? "." : "");
+        if (this.displayValueOverflows()) {
+            console.log("Text too wide");
+            this.resolveDisplayOverflow();
+        }
+    }
+
+
+    // Event handling
     numpadWasPressed(e) {
         const pressedValue = e.target.id;
         if (pressedValue == "decimal-point") {
-
+            if (!(this.currentValue ?? "").toString().includes(".")) {
+                this.pendingDecimal = true;
+            }
         } else {
-            this.displayValue += pressedValue;
+            this.currentValue = parseFloat((this.currentValue ?? "").toString() + this.resolveDecimalPoint() + pressedValue);
         }
 
         this.updateDisplay();
@@ -46,22 +67,18 @@ export class Controller {
     operatorWasPressed(e) {
         const pressedOperator = Operator[e.target.id.toUpperCase()];
         if (this.pendingValue && this.pendingOperator) {
-            const res = this.operate(this.pendingOperator, this.pendingValue, parseFloat(this.displayValue));
-            this.displayValue = res.toString();
-            this.pendingValue = parseFloat(this.displayValue);
+            const res = this.operate(this.pendingOperator, this.pendingValue, this.currentValue);
+            this.currentValue = Number(res.toFixed(15));
+            this.pendingValue = this.currentValue;
             this.pendingOperator = pressedOperator;
         } else {
-            this.pendingValue = parseFloat(this.displayValue);
+            this.pendingValue = this.currentValue;
             this.pendingOperator = pressedOperator;
         }
 
         // Show the result on display, but reset display value from next number press
         this.updateDisplay();
-        this.displayValue = "";
-    }
-
-    updateDisplay() {
-        this.displayPanel.textContent = this.displayValue;
+        this.currentValue = null;
     }
 
     clearAll() {
@@ -70,27 +87,49 @@ export class Controller {
     }
 
     backspace() {
-        this.displayValue = this.displayValue.slice(0, -1);
+        this.currentValue = parseFloat((this.currentValue ?? "").toString().slice(0, -1));
         this.updateDisplay();
     }
 
     equals() {
-        if (this.pendingValue && this.pendingOperator && (this.displayValue.length > 0)) {
-            const res = this.operate(this.pendingOperator, this.pendingValue, parseFloat(this.displayValue));
-            this.displayValue = res.toString();
+        if (this.pendingValue && this.pendingOperator) {
+            const res = this.operate(this.pendingOperator, this.pendingValue, this.currentValue);
+            this.currentValue = Number(res.toFixed(15));
             this.updateDisplay();
             this.pendingValue = null;
             this.pendingOperator = null;
         }
     }
 
+    // Helper Methods
     resetStoredValues() {
-        this.displayValue = "";
-        this.pendingValue = null;
-        this.pendingOperator = null;
+        this.currentValue = this.pendingValue = this.pendingOperator = null;
+    }
+
+    resolveDecimalPoint() {
+        if (this.pendingDecimal) {
+            this.pendingDecimal = false;
+            return ".";
+        } else {
+            return "";
+        }
+    }
+
+    displayValueOverflows() {
+        return this.displayValueElement.clientWidth > parseFloat(window.getComputedStyle(this.displayPanel).width)
+    }
+
+    resolveDisplayOverflow() {
+        console.log(`Resolving display overflow...`);
+        let precision = 15;
+        while (this.displayValueOverflows()) {
+            this.displayValueElement.textContent = parseFloat(this.displayValueElement.textContent).toExponential(precision);
+            precision--;
+        }
     }
 
 
+    // Bind UI elements
     bindUI() {
         const numpadPressHandler = e => this.numpadWasPressed(e);
         const numpadButtons = document.querySelectorAll(".js-numpad-button");
@@ -113,7 +152,8 @@ export class Controller {
         const equalsButton = document.querySelector(".js-equals");
         equalsButton.addEventListener("click", e => this.equals());
 
-        this.displayPanel = document.querySelector(".js-display");
+        this.displayValueElement = document.querySelector(".js-display-value");
+        this.displayPanel = document.querySelector(".js-display-panel");
         this.updateDisplay();
     }
 }
