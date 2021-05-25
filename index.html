@@ -10,10 +10,13 @@
     <body>
         <main class="l-page-wrapper">
             <div class="l-calculator__body">
-                <div class="l-calculator__display js-display-panel"><span class="c-display-text js-display-value"></span></div>
+                <div class="l-calculator__display js-display-panel">
+                    <span class="c-display__value js-display-value"></span>
+                    <span class="c-display__error js-display-error"></span>
+                </div>
                 <button class="c-calculator__button --action js-clear-all" id="clear-all">AC</button>
                 <button class="c-calculator__button --action js-backspace" id="clear">C</button>
-                <button class="c-calculator__button --action --blank"></button>
+                <button class="c-calculator__button --action js-plus-minus" id="plus-minus">&#177</button>
                 <button class="c-calculator__button --operator js-operator-button" id="divide">&#x00F7</button>
                 <button class="c-calculator__button --number js-numpad-button" id="7">7</button>
                 <button class="c-calculator__button --number js-numpad-button" id="8">8</button>
@@ -27,7 +30,6 @@
                 <button class="c-calculator__button --number js-numpad-button" id="2">2</button>
                 <button class="c-calculator__button --number js-numpad-button" id="3">3</button>
                 <button class="c-calculator__button --operator js-operator-button" id="add">+</button>
-                <button class="c-calculator__button --action --blank"></button>
                 <button class="c-calculator__button --number js-numpad-button" id="0">0</button>
                 <button class="c-calculator__button --number js-numpad-button" id="decimal-point">.</button>
                 <button class="c-calculator__button --action js-equals" id="equals">=</button>

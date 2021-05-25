@@ -21,10 +21,10 @@ body {
     padding: 25px 10px 15px 10px;
     height: 650px;
     width: 400px;
-    background-color: darkgrey;
+    background-color: gray;
 
     border-radius: 10px;
-    box-shadow: 4px 4px 12px 0px black;
+    box-shadow: 4px 4px 12px 0px rgb(61, 61, 61);
 
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -38,22 +38,32 @@ body {
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
-    font-size: 60px;
     padding: 0px 15px 15px 5px;
     margin: 3px;
 
+
     box-shadow: inset 0px 0px 8px -1px black;
+}
+
+.c-display__value {
+    font-size: 60px;
+}
+
+.c-display__error {
+    font-size: 26px;
+    color: red;
 }
 
 .c-calculator__button {
     margin: 3px;
     border: 1px solid black;
     font-size: 28px;
+    border-radius: 10px;
+    background-color: lightgrey;
 }
 
 .c-calculator__button.--action {
-    border-radius: 100%;
-    background-color: orange;
+    background-color: rgb(190, 60, 82);
     color: white;
 }
 
@@ -62,6 +72,16 @@ body {
 }
 
 .c-calculator__button.--operator {
-    border-radius: 100%;
-    background-color: turquoise;
+    background-color: rgb(71, 86, 117);
+    color: white;
 }
+
+.c-calculator__button#equals {
+    grid-column-start: 3;
+    grid-column-end: 5;
+    background-color: rgb(6, 179, 78);
+}
+
+/* .c-calculator__button.--number.--js-active {
+    background-color: darkslateblue;
+} */
