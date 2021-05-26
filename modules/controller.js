@@ -21,15 +21,21 @@ export class Controller {
     // UI elements
     displayValueElement;
     displayErrorElement;
+    displayEquationElement;
     displayPanel;
     keyboardLinkedButtons = {};
 
     // Stored values/flags
     currentNumberString = "";
-    pendingDecimal = false;
-    pendingValue = null;
-    pendingOperator = null;
-    displayingCalculationResult = false;
+    // equation.pendingValue = null;
+    // equation.pendingOperator = null;
+    // equation.equalsSign = false;
+    equation = {
+        pendingValue: null,
+        pendingOperator: null,
+        secondValue: null,
+        equalsSign: false,
+    };
 
     // Init
     constructor() {
@@ -45,16 +51,24 @@ export class Controller {
 
     updateDisplay() {
         this.displayErrorElement.textContent = "";
+        this.displayErrorElement.style.display = "none";
         this.displayValueElement.textContent = this.currentNumberString;
         if (this.displayValueOverflows()) {
             console.log("Text too wide");
             this.resolveDisplayOverflow();
         }
+
+        this.displayEquationElement.textContent = (
+            `${this.equation.pendingValue ?? ""}` +
+            ` ${this.equation.pendingOperator ? this.equation.pendingOperator.asString : ""}` +
+            ` ${this.equation.secondValue ?? ""}` +
+            ` ${this.equation.equalsSign ? "=" : ""}`
+            );
     }
 
     toggleSign() {
         // Would it be better to just let this be handled by the subtraction sign?
-        if (!this.displayingCalculationResult) {
+        if (!this.equation.equalsSign) {
             this.currentNumberString = (this.currentNumberString[0] == "-") ?
                 (this.currentNumberString.slice(1)) :
                 ("-" + this.currentNumberString);
@@ -65,8 +79,8 @@ export class Controller {
 
     // Event handling
     numpadWasPressed(e) {
-        if (this.displayingCalculationResult) {
-            this.displayingCalculationResult = false;
+        if (this.equation.equalsSign) {
+            this.equation.equalsSign = false;
             this.currentNumberString = "";
         }
         const pressedValue = e.target.id;
@@ -92,19 +106,20 @@ export class Controller {
             return;
         }
         
-        if (this.pendingValue && this.pendingOperator) {
+        if (this.equation.pendingValue && this.equation.pendingOperator) {
             console.log("Check");
             this.equals();
-            this.pendingValue = parseFloat(this.currentNumberString);
-            this.pendingOperator = pressedOperator;
+            this.equation.pendingValue = parseFloat(this.currentNumberString);
+            this.equation.pendingOperator = pressedOperator;
         } else {
-            this.pendingValue = parseFloat(this.currentNumberString)
-            this.pendingOperator = pressedOperator;
+            this.equation.pendingValue = parseFloat(this.currentNumberString)
+            this.equation.pendingOperator = pressedOperator;
         }
 
-        // Show the result on display, but reset display value from next number press
-        this.updateDisplay();
+        this.equation.equalsSign = false;
         this.currentNumberString = "";
+
+        this.updateDisplay();
     }
 
     clearAll() {
@@ -113,7 +128,7 @@ export class Controller {
     }
 
     backspace() {
-        if (!this.displayingCalculationResult) {
+        if (!this.equation.equalsSign) {
             this.currentNumberString = this.currentNumberString.slice(0, -1);
             this.updateDisplay();
         }
@@ -124,26 +139,33 @@ export class Controller {
             return;
         }
 
-        if (this.pendingValue && this.pendingOperator && this.currentNumberString) {
+        if (this.equation.pendingValue && this.equation.pendingOperator && this.currentNumberString) {
+            this.equation.secondValue = parseFloat(this.currentNumberString);
             // Handle division by zero
-            if (this.pendingOperator == Operator.DIVIDE && parseFloat(this.currentNumberString) == 0) {
+            if (this.equation.pendingOperator == Operator.DIVIDE && this.equation.secondValue == 0) {
                 this.raiseError("Can't divide by zero");
                 return;
             }
-            const res = this.operate(this.pendingOperator, this.pendingValue, parseFloat(this.currentNumberString));
+            const res = this.operate(this.equation.pendingOperator, this.equation.pendingValue, this.equation.secondValue);
+            if (res > Number.MAX_VALUE) {
+                this.raiseError("Maximum value exceeded");
+                return;
+            }
             // Number(res.toFixed(15)) solves (I think?) issues due to float precision (e.g., 0.1 * 0.2 = 0.020000000000004) 
             this.currentNumberString = Number(res.toFixed(15)).toString();
+            this.equation.equalsSign = true;
             this.updateDisplay();
-            this.pendingValue = null;
-            this.pendingOperator = null;
-            this.displayingCalculationResult = true;
+            this.equation.pendingValue = null;
+            this.equation.pendingOperator = null;
+            this.equation.secondValue = null;
         }
     }
 
     // Helper Methods
     resetStoredValues() {
-        this.pendingValue = this.pendingOperator = null;
+        this.equation.pendingValue = this.equation.pendingOperator = this.equation.secondValue = null;
         this.currentNumberString = "";
+        this.equation.equalsSign = false;
     }
 
     displayValueOverflows() {
@@ -162,6 +184,7 @@ export class Controller {
     raiseError(message) {
         this.clearAll();
         this.displayErrorElement.textContent = `ERROR: ${message}`;
+        this.displayErrorElement.style.display = "block";
     }
 
 
@@ -218,6 +241,8 @@ export class Controller {
         this.displayPanel = document.querySelector(".js-display-panel");
 
         this.displayErrorElement = document.querySelector(".js-display-error");
+
+        this.displayEquationElement = document.querySelector(".js-display-equation");
 
         this.updateDisplay();
     }
