@@ -24,12 +24,10 @@ export class Controller {
     displayEquationElement;
     displayPanel;
     keyboardLinkedButtons = {};
+    calculatorBody;
 
     // Stored values/flags
     currentNumberString = "";
-    // equation.pendingValue = null;
-    // equation.pendingOperator = null;
-    // equation.equalsSign = false;
     equation = {
         pendingValue: null,
         pendingOperator: null,
@@ -37,11 +35,13 @@ export class Controller {
         equalsSign: false,
     };
 
+
     // Init
     constructor() {
         this.bindUI();
         this.bindKeys();
     }
+
 
     
     // Core Methods
@@ -67,7 +67,6 @@ export class Controller {
     }
 
     toggleSign() {
-        // Would it be better to just let this be handled by the subtraction sign?
         if (!this.equation.equalsSign) {
             this.currentNumberString = (this.currentNumberString[0] == "-") ?
                 (this.currentNumberString.slice(1)) :
@@ -105,9 +104,12 @@ export class Controller {
             }
             return;
         }
+
+        if (!parseFloat(this.currentNumberString)) {
+            return;
+        }
         
         if (this.equation.pendingValue && this.equation.pendingOperator) {
-            console.log("Check");
             this.equals();
             this.equation.pendingValue = parseFloat(this.currentNumberString);
             this.equation.pendingOperator = pressedOperator;
@@ -161,6 +163,40 @@ export class Controller {
         }
     }
 
+    resizeCalc() {
+        /* Dynamically resize the calculator body when the window is resized */
+        const CALC_TO_SCREEN_RATIO = 0.95
+        const calcStyle = window.getComputedStyle(this.calculatorBody);
+
+        /* Aspect ratio of calculator is needed to determine whether the viewport's width or height
+        is the limiting factor for calculator size */
+        const aspectRatio = this.calculatorBody.offsetWidth / this.calculatorBody.offsetHeight
+        const wrapperWidth = this.calculatorBody.parentElement.offsetWidth;
+        const wrapperHeight = this.calculatorBody.parentElement.offsetHeight;
+        const scaledWrapperHeight = aspectRatio * wrapperHeight;
+
+        let calculatedScaleRatio;
+        if (wrapperWidth < scaledWrapperHeight) {
+            // Match to width
+            const targetOffsetWidth = wrapperWidth * CALC_TO_SCREEN_RATIO;
+            const paddingWidth = this.calculatorBody.offsetWidth - parseFloat(calcStyle.width);
+            const targetWidth = targetOffsetWidth - paddingWidth;
+            const newWidth = Math.max(parseFloat(calcStyle.minWidth), Math.min(parseFloat(calcStyle.maxWidth), targetWidth));
+            calculatedScaleRatio = newWidth / parseFloat(calcStyle.width);
+        } else {
+            // Match to height
+            const targetOffsetHeight = wrapperHeight * CALC_TO_SCREEN_RATIO;
+            const paddingHeight = this.calculatorBody.offsetHeight - parseFloat(calcStyle.height);
+            const targetHeight = targetOffsetHeight - paddingHeight;
+            const newHeight = Math.max(parseFloat(calcStyle.minHeight), Math.min(parseFloat(calcStyle.maxHeight), targetHeight));
+            calculatedScaleRatio = newHeight / parseFloat(calcStyle.height);
+        }
+
+        this.calculatorBody.style.transform = `scale(${calculatedScaleRatio})`;
+    }
+
+
+
     // Helper Methods
     resetStoredValues() {
         this.equation.pendingValue = this.equation.pendingOperator = this.equation.secondValue = null;
@@ -169,11 +205,12 @@ export class Controller {
     }
 
     displayValueOverflows() {
+        /* Check whether the display string is overflowing the calculator display */
         return this.displayValueElement.clientWidth > parseFloat(window.getComputedStyle(this.displayPanel).width)
     }
 
     resolveDisplayOverflow() {
-        console.log(`Resolving display overflow...`);
+        /* Modify the string shown in the calculator display to make sure that it fits */
         let precision = 21;
         while (this.displayValueOverflows()) {
             this.displayValueElement.textContent = parseFloat(this.currentNumberString).toPrecision(precision);
@@ -182,11 +219,14 @@ export class Controller {
     }
 
     raiseError(message) {
+        /* Display an error message on the calculator display */
         this.clearAll();
         this.displayErrorElement.textContent = `ERROR: ${message}`;
+        // this.displayErrorElement.style.display is set to "none" at all other times
         this.displayErrorElement.style.display = "block";
     }
 
+    
 
     // Bind UI elements
     bindUI() {
@@ -245,6 +285,11 @@ export class Controller {
         this.displayEquationElement = document.querySelector(".js-display-equation");
 
         this.updateDisplay();
+
+        this.calculatorBody = document.querySelector(".js-calculator-body");
+        window.addEventListener("resize", e => this.resizeCalc());
+
+        this.resizeCalc();
     }
 
     bindKeys() {
@@ -253,7 +298,6 @@ export class Controller {
 
         document.addEventListener("keydown", e => {
             let key = e.key;
-            console.log(`${key} was pressed`)
             /* Normally I'd use switch-case, but this doesn't allow regex testing for
             numerical characters. I saw an example online using switch (true) and
             case /[0-9]/.test(key); this might be a better solution for real-world,
@@ -278,7 +322,6 @@ export class Controller {
 
         document.addEventListener("keyup", e => {
             let key = e.key;
-            console.log(`${key} was pressed`)
             /* Normally I'd use switch-case, but this doesn't allow regex testing for
             numerical characters. I saw an example online using switch (true) and
             case /[0-9]/.test(key); this might be a better solution for real-world,
